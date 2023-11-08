@@ -16,6 +16,7 @@ const userSchema = new mongoose.Schema({
         trim: true,
         unique: true
     },
+
     email: {
         type: String,
         unique: true,
@@ -63,6 +64,12 @@ const userSchema = new mongoose.Schema({
         default: [],
     },
 
+})
+//the relationship between the tweets and user
+userSchema.virtual('tweets', {
+    ref: "Tweet",
+    localField: '_id',
+    foreignField: 'user'
 })
 // hide the passwork when making API calls
 userSchema.methods.toJSON = function () {
