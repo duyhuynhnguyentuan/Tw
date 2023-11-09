@@ -65,7 +65,7 @@ const userSchema = new mongoose.Schema({
     },
 
 })
-//the relationship between the tweets and user
+//the relationship between the tweets and user 
 userSchema.virtual('tweets', {
     ref: "Tweet",
     localField: '_id',
@@ -89,6 +89,20 @@ userSchema.pre('save', async function(next) {
     }
     next()
 })
+
+//Authentication check 
+userSchema.statics.findByCredentials = async (email, password) => {
+    const user = await User.findOne({ email })
+    if (!user) {
+        throw new Error("Email doesn't exist")
+    }
+    const isMatch = await bcrypt.compare(password, user.password)
+
+    if(!isMatch){
+        throw new Error("Incorrect password")
+    }
+    return user
+}
 
 const User = mongoose.model('User', userSchema)
 
