@@ -2,6 +2,16 @@ const express = require('express');
 const User = require('../models/user')
 //original router
 const router = new express.Router();
+const multer = require('multer');
+const sharp = require('sharp');
+
+//Helpers
+const upload = multer({
+    limits: {
+        fileSize: 50 * 1024 * 1024 // 50MB in bytes
+    }
+});
+
 
 //Endpoints
 
@@ -62,6 +72,21 @@ router.get('/users/:id', async (req, res) => {
     } catch (error) {
         res.status(500).send(error)
     }
+})
+
+//post user profile image
+router.post('/users/me/avatar', async (req, res)=> {
+    const buffer = await sharp(req.file.buffer).resize({width: 250, height: 250}).png().toBuffer()
+    if(req.user.avatar != null){
+        req.user.avatar = null
+        req.user.avatarExists =false
+    }
+    req.user.avatar = buffer
+    req.user.avatarExists = true
+    await req.user.save()
+    res.send()
+}, (error, req,res, next) => {
+    res.status(400).send({error: error.message})
 })
 
 module.exports = router
