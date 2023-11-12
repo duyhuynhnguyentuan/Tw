@@ -4,7 +4,7 @@ const User = require('../models/user')
 const router = new express.Router();
 const multer = require('multer');
 const sharp = require('sharp');
-
+const auth = require('../middleware/auth');
 //Helpers
 const upload = multer({
     limits: {
@@ -75,7 +75,7 @@ router.get('/users/:id', async (req, res) => {
 })
 
 //post user profile image
-router.post('/users/me/avatar', async (req, res)=> {
+router.post('/users/me/avatar', auth, upload.single('avatar'), async (req, res)=> {
     const buffer = await sharp(req.file.buffer).resize({width: 250, height: 250}).png().toBuffer()
     if(req.user.avatar != null){
         req.user.avatar = null
@@ -84,8 +84,8 @@ router.post('/users/me/avatar', async (req, res)=> {
     req.user.avatar = buffer
     req.user.avatarExists = true
     await req.user.save()
-    res.send()
-}, (error, req,res, next) => {
+    res.send(buffer)
+}, (error, req, res, next) => {
     res.status(400).send({error: error.message})
 })
 
