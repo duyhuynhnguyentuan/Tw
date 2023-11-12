@@ -101,4 +101,30 @@ router.get('/users/:id/avatar', async (req, res) => {
         res.status(404).send(e)
     }
 })
+
+//Route for following
+router.put('/users/:id/follow', auth, async (req, res) => {
+    if (req.user._id != req.params.id) {
+        try {
+            const userToFollow = await User.findById(req.params.id);
+
+            if (!userToFollow.followers.includes(req.user._id)) {
+                // Update the user being followed
+                await userToFollow.updateOne({ $push: { followers: req.user._id } });
+
+                // Update the authenticated user's followings
+                await req.user.updateOne({ $push: { following: req.params.id } });
+
+                res.status(200).json("User has been followed successfully");
+            } else {
+                res.status(403).json("You have already followed this user");
+            }
+        } catch (error) {
+            res.status(500).send(error);
+        }
+    } else {
+        res.status(403).json("You cannot follow yourself");
+    }
+});
+
 module.exports = router
