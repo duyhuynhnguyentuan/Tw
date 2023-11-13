@@ -150,6 +150,25 @@ router.put('/users/:id/unfollow', auth, async (req, res) => {
         res.status(403).json("You cannot unfollow yourself");
     }
 });
-
+//update user information
+router.patch('/users/me', auth, async (req, res) => {
+    const updates = Object.keys(req.body)
+    //var that contains fields that are able  to be update
+    const allowedUpdates = ['name', 'email', 'password', 'website', 'bio', 'location']
+    const isValidOperation = updates.every((update) => allowedUpdates.includes(update));
+    if (!isValidOperation){
+        return res.status(400).send({
+            error: 'Invalid request!'
+        })
+    }
+    try {
+      const user = req.user 
+      updates.forEach((update) => {user[update] = req.body[update]})
+      await user.save()
+      res.send(user) 
+    } catch (error) {
+        res.status(400).send(error)
+    }
+})
 
 module.exports = router
