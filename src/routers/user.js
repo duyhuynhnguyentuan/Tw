@@ -27,7 +27,7 @@ router.post('/users', async (req, res) => {
     }
 })
 
-// Fetch the users
+// Fetch all the users
 router.get('/users', async(req, res) => {
     try {
         const user = await User.find({})

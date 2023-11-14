@@ -3,6 +3,14 @@ const Tweet = require('../models/Tweet');
 //new router
 const router = new express.Router();
 const auth = require('../middleware/auth')
+//multer and sharp for image loading
+const multer = require('multer');
+const sharp = require('sharp');
+const upload = multer({
+    limits: {
+        fileSize: 50 * 1024 * 1024 // 50MB in bytes
+    }
+});
 //Post tweet router
 router.post('/tweets',auth, async (req, res) => {
     const tweet = new Tweet({
@@ -16,5 +24,44 @@ router.post('/tweets',auth, async (req, res) => {
         res.status(500).send(error)
     }
 })
+//get all tweet route
+router.get('/tweets', async(req, res) => {
+    try {
+        const tweet = await Tweet.find({})
+        res.send(tweet)
+
+    } catch (error) {
+        res.status(500).send(error)
+    }
+})
+//upload image tweet
+router.post('/uploadTweetImage/:id', auth, upload.single('upload'), async (req, res) => {
+    const tweet = await Tweet.findOne({ _id: req.params.id })
+    console.log(tweet)
+    if (!tweet) {
+        throw new Error('Cannot find the tweet')
+    }
+    const buffer = await sharp(req.file.buffer).resize({ width: 350, height: 350 }).png().toBuffer()
+    console.log(buffer)
+    tweet.image = buffer
+    await tweet.save()
+    res.send(buffer)
+}, (error, req, res, next) => {
+    res.status(400).send({ error: error.message })
+})
+//get tweet image
+router.get('/tweets/:id/image', async(req, res) => {
+ try {
+    const tweet = await Tweet.findById(req.params.id)
+    if (!tweet && !tweet.image){
+        throw new Error('Cannot find the tweet')
+    }
+    res.set('Content-Type', 'image/jpg')
+    res.send(tweet.image)
+ } catch (error) {
+    res.status(404).send({ error: error.message })
+ }
+})
+
 
 module.exports = router
