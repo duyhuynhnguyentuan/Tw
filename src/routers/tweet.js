@@ -6,6 +6,7 @@ const auth = require('../middleware/auth')
 //multer and sharp for image loading
 const multer = require('multer');
 const sharp = require('sharp');
+const { updateOne } = require('../models/user');
 const upload = multer({
     limits: {
         fileSize: 50 * 1024 * 1024 // 50MB in bytes
@@ -62,6 +63,19 @@ router.get('/tweets/:id/image', async(req, res) => {
     res.status(404).send({ error: error.message })
  }
 })
-
+//Like tweet
+router.put('/users/:id/like', auth, async (req, res) => {
+    try {
+        const tweet = await Tweet.findById(req.params.id)
+        if(!tweet.likes.includes(req.user._id)){
+            await updateOne({$push: {likes: req.user._id}})
+            res.status(200).json("post has been liked")
+        }else{
+            res.status(404).json("You have already liked this tweet")
+        }
+    } catch (error) {
+        res.status(500).json(error)
+    }
+})
 
 module.exports = router
