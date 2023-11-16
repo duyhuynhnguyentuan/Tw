@@ -35,6 +35,20 @@ router.get('/tweets', async(req, res) => {
         res.status(500).send(error)
     }
 })
+//get a user's tweets
+router.get('/tweets/:id', async(req, res) => {
+    try {
+        const _id = req.params.id
+        const tweet = await Tweet.find({user : _id})
+        if(!tweet){
+            return res.status(404).send()
+        }
+        res.send(tweet)
+
+    } catch (error) {
+        res.status(500).send(error)
+    }
+})
 //upload image tweet
 router.post('/uploadTweetImage/:id', auth, upload.single('upload'), async (req, res) => {
     const tweet = await Tweet.findOne({ _id: req.params.id })
