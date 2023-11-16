@@ -78,6 +78,19 @@ userSchema.virtual('tweets', {
     localField: '_id',
     foreignField: 'user'
 })
+
+//the relationship between the notifications and users
+userSchema.virtual('notificationSent', {
+    ref: "Notification",
+    localField: '_id',
+    foreignField: 'notSenderId'
+})
+userSchema.virtual('notificationReceived', {
+    ref: "Notification",
+    localField: '_id',
+    foreignField: 'notReceiverId'
+})
+
 // hide the passwork when making API calls
 userSchema.methods.toJSON = function () {
     const user = this
