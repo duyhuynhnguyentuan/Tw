@@ -1,5 +1,5 @@
 const express = require('express');
-const Tweet = require('../models/Tweet');
+const Tweet = require('../models/tweet');
 //new router
 const router = new express.Router();
 const auth = require('../middleware/auth')
