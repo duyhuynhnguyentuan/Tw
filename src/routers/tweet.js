@@ -67,8 +67,8 @@ router.get('/tweets/:id/image', async(req, res) => {
 router.put('/tweets/:id/like', auth, async (req, res) => {
     try {
         const tweet = await Tweet.findById(req.params.id);
-        if (!tweet.likes.includes(req.user.id)) {
-        await tweet.updateOne({ $push: { likes: req.user.id } });
+        if (!tweet.likes.includes(req.user._id)) {
+        await tweet.updateOne({ $push: { likes: req.user._id } });
         // await req.user.updateOne({ $push: { followings: req.params.id } });
         res.status(200).json("post has been liked");
         console.log('it has been liked');
@@ -79,5 +79,20 @@ router.put('/tweets/:id/like', auth, async (req, res) => {
         res.status(500).json(err);
     }
 });
+
+//Unlike tweet
+router.put('/tweets/:id/unlike', auth, async (req, res)=> {
+    try {
+        const tweet = await Tweet.findById(req.params.id);
+        if(tweet.likes.includes(req.user._id)){
+            await tweet.updateOne({$pull: {likes : req.user._id}});
+            res.status(200).json("Unlike tweet successfully")
+        }else{
+            res.status(403).json("Have not liked tweet")
+        }
+    } catch (error) {
+        res.status(500).json(error)
+    }
+})
 
 module.exports = router
